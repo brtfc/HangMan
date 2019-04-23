@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Hangman {
 
-    public Set<Character> usedLetters = new HashSet<>(); //ensures that repeated letters are not stored.
+    public static Set<Character> usedLetters = new HashSet<>(); //ensures that repeated letters are not stored.
     public static StringBuilder gameBoardSlots = new StringBuilder("");
 
     public void displayTitleAndlogo(){
@@ -15,15 +15,6 @@ public class Hangman {
                 "                    __/ |                      \n" +
                 "                   |___/  ");
 
-        /*
-        System.out.println("___________\n" +
-                "|         |\n" +
-                "|         0\n" +
-                "|        /|\\\n" +
-                "|        / \\\n" +
-                "|\n" +
-                "|");
-        */
     }
 
     //a string array of words
@@ -31,8 +22,8 @@ public class Hangman {
     //random numbers uses the current system time, thus,
     public String generateSecretWord(){
         Random random = new Random();
-        String[] secretWords = {"draw", "blank", "line","each","letter", "word", "Not", "for",
-                "a", "list", "with", "three", "entries.", "more", "entries", "it", "might be worth"};
+        String[] secretWords = {"draw", "blank", "line","each","letter", "word", "not", "for",
+                            "list", "with", "three", "entries.", "more", "entries", "might", "worth"};
         //randomly chooses the secret word to guess
         String secretWord = secretWords[random.nextInt((secretWords.length -1) + 1)];
         return secretWord;
@@ -58,15 +49,12 @@ public class Hangman {
                 }
             }
         }
-        else {
-            charPositions.add(-1);
-        }
 
         return charPositions;
     }
 
     //prompt player to enter guess aA through zZ
-    //performs input validation on user entered characters
+    //performs input validation on user entered characters as well as already used letters
     public char userGuessPrompt(){
         Scanner input = new Scanner(System.in);
         char userGuess;
@@ -78,17 +66,12 @@ public class Hangman {
 
         //return only valid character entries
         //add valid entry to set
+        //convert all entries to lower character sets
         userGuess = Character.toLowerCase(input.next().charAt(0));
         usedLetters.add(userGuess);
         return userGuess;
     }
 
-
-    public void displayGameBoard(ArrayList<Integer> charPositions, int secretWordLength){
-        for(int k = 0; k < secretWordLength; k++){
-            gameBoardSlots.append('_');
-        }
-    }
 
     public static void main(String[] args){
         Hangman player1 = new Hangman();
@@ -96,40 +79,54 @@ public class Hangman {
         ArrayList<Integer> charPos = new ArrayList<>();
         char userGuess;
 
-        //display empty game board
-        String secretString = player1.generateSecretWord();
-        int secretStringLength = secretString.length();
-
         //display logo and game description
         player1.displayTitleAndlogo();
+
+        //generate a word from the list of words
+        String secretString = player1.generateSecretWord();
 
         //display the secret word
         System.out.println(secretString);
 
         //print a corresponding number of underscores
-        for(int i = 0; i < secretStringLength; i++){
+        for(int i = 0; i < secretString.length(); i++){
             hiddenWord.append("_");
         }
 
-        //display empty game board
-        System.out.println(hiddenWord.toString());
-
-        userGuess = player1.userGuessPrompt();
-
         //play the game 26 times, i.e each user has 26 attempts at guessing the right word
+        //however, this can be overrided anytime: once the word is complete
         //Main Game Play:
         for(int j = 0; j < 26; j++){
-            //display empty slots
+            //display empty game board
+            System.out.println(hiddenWord.toString());
+
             //prompt user for input
-            //add user letter into the list of already used characters
+            userGuess = player1.userGuessPrompt();
+
             //insert that letter into the appropriate index position
+            charPos.addAll(player1.getCharIndex(secretString, userGuess));
+
+            for(int i : charPos){
+                hiddenWord.setCharAt(i, userGuess);
+            }
+
+            //reset the arraylist to empty by default
+            charPos.clear();
+
             //check if the user guesses all the  correct letters.
-                //announce winner and break early out of the game
+            //announce winner and break early out of the game
+            if(hiddenWord.toString().equals(secretString)){
+                System.out.println("\nYou guessed right! Word is " + secretString);
+                break;
+            }
+
+            //game over: user exhusts all characters a through z
+            if(usedLetters.size() == 26){
+                System.out.println("\nGame Over!! All");
+            }
+
 
         }
-
-
-
 
     }
 }
