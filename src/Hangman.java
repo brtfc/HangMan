@@ -132,7 +132,7 @@ public class Hangman {
                 }
 
                 j++;
-                //reset the index list to empty by default
+                //reset the index list back to empty
                 charPos.clear();
 
             }
