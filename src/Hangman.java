@@ -4,7 +4,7 @@ public class Hangman {
 
     public static Scanner input = new Scanner(System.in);
 
-    public void displayGameTitleAndDescription(){
+    public void displayTitleAndlogo(){
         System.out.println(" _                                             \n" +
                 "| |                                            \n" +
                 "| |__   __ _ _ __   __ _ _ __ ___   __ _ _ __  \n" +
@@ -12,44 +12,38 @@ public class Hangman {
                 "| | | | (_| | | | | (_| | | | | | | (_| | | | |\n" +
                 "|_| |_|\\__,_|_| |_|\\__, |_| |_| |_|\\__,_|_| |_|\n" +
                 "                    __/ |                      \n" +
-                "                   |___/  \n\n");
+                "                   |___/  ");
 
-        System.out.print("\t\tHello There, Welcome To Hangman!\n" +
-                "In Hangman, A secret Word Is Generated and You \n" +
-                "Try To Guess It By Entering One Letter At A Time\n" +
-                "\t\tYou Are Given 26 Chances\n\n");
+        System.out.print("Hello There, Welcome To Hangman!\n" +
+                "The Computer Generated A secret Word and then\n" +
+                "You Try To Guess It By Entering One Letter At A Time\n" +
+                "You Are Given 26 Chances\n\n");
 
     }
 
-    //return a random word from an array of words
+    //a string array of words
+    //or simply ask the opponent to write down his own secret word
+    //random numbers uses the current system time, thus,
     public String generateSecretWord(){
         Random random = new Random();
         String[] secretWords = {"draw", "blank", "line","each","letter", "word", "not", "for",
-                            "list", "with", "three", "entries", "more", "entries", "might", "worth"};
+                "list", "with", "three", "entries.", "more", "entries", "might", "worth"};
         //randomly chooses the secret word to guess
         String secretWord = secretWords[random.nextInt((secretWords.length -1) + 1)];
         return secretWord;
     }
 
-    //prompt player to enter guess aA through zZ
-    //performs input validation on user entered characters as well as already used letters
-    public char userGuessPrompt(){
-
-        char userGuess;
-        System.out.print("Enter guess aA - zZ: ");
-        while (!input.hasNext("[A-Za-z]+")){
-            System.out.print("Only characters (aA - zZ) accepted: ");
-            input.next();
+    //check if the user guess is found in the generated string
+    public boolean isCharFound(String word, char letter){
+        //compare each index with the character
+        for(int i = 0; i < word.length(); i++){
+            if(word.charAt(i) == letter){
+                return true;
+            }
         }
-
-        //return only valid character entries
-        //add valid entry to set
-        //convert all entries to lower character sets
-        userGuess = Character.toLowerCase(input.next().charAt(0));
-        return userGuess;
+        return false;
     }
 
-    //if the user guessed letter is found in the word, get the index position
     public ArrayList<Integer> getCharIndex(String word, char letter){
         ArrayList<Integer> charPositions = new ArrayList<>();
         if(isCharFound(word, letter)){
@@ -63,51 +57,63 @@ public class Hangman {
         return charPositions;
     }
 
-    //check if the user guess letter is found in the generated word
-    public boolean isCharFound(String word, char letter){
-        //compare each index with the character
-        for(int i = 0; i < word.length(); i++){
-            if(word.charAt(i) == letter){
-                return true;
-            }
+    //prompt player to enter guess aA through zZ
+    //performs input validation on user entered characters as well as already used letters
+    public char userGuessPrompt(){
+
+        char userGuess;
+        System.out.print("Enter guess aA - zZ: ");
+        while (!input.hasNext("[A-Za-z]+")){
+            System.out.print("Only characters aA - zZ accepted or letter already used: ");
+            input.next();
         }
-        return false;
+
+        //return only valid character entries
+        //add valid entry to set
+        //convert all entries to lower character sets
+        userGuess = Character.toLowerCase(input.next().charAt(0));
+        return userGuess;
     }
+
 
     public static void main(String[] args){
         Hangman player1 = new Hangman();
         StringBuilder hiddenWord = new StringBuilder();
         ArrayList<Integer> charPos = new ArrayList<>();
         char userGuess;
+        char gamePlayResponse;
 
-        /*
-        * we can add some more features such as
-        * the number of gameplays
-        * the number of wins
-        * the number of loses
-        * all the words used so far
-        * we can introduce a sentinel that terminates the program early
-        * */
+        /**
+         * OTHER GAME IDEAS
+         * add a counter for how many times the game has been played
+         * terminate the game if the player exhausts all the 26 attempts
+         */
+
 
         //display logo and game description
-        player1.displayGameTitleAndDescription();
+        player1.displayTitleAndlogo();
 
-        //prompt user for game play
-        System.out.print("Do You Want To Play? (y/n): ");
-        while(input.hasNext("y")){
+        //Main Game Play
+        System.out.print("\nDo you want to play? {y/n): ");
+        gamePlayResponse = input.next().charAt(0);
+
+        while (gamePlayResponse == 'y'){
+            //empty the StringBuilder object for the next game play
+            hiddenWord.setLength(0);
+
             //generate a word from the list of words
             String secretString = player1.generateSecretWord();
 
-            //create a corresponding number of underscores
+            //print the corresponding number of underscores
             for(int i = 0; i < secretString.length(); i++){
-                hiddenWord.append("_");
+                hiddenWord.append("-");
             }
 
             //play the game 26 times, i.e each user has 26 attempts at guessing the right word
-            //however, this can be overrided anytime: once the word is complete
+            //however, this can be overridden anytime: once all the letters are guessed right
             //Main Game Play:
-            int j = 0;
-            while(j < 26){
+            for(int guessAttempts = 1; guessAttempts <= 26; guessAttempts++){
+
                 //display empty game board
                 System.out.println(hiddenWord.toString());
 
@@ -121,31 +127,36 @@ public class Hangman {
                     hiddenWord.setCharAt(i, userGuess);
                 }
 
+                //reset the index list to empty by default
+                charPos.clear();
+
                 //check if the user guesses all the  correct letters.
-                //reset the chances back to zero
                 //announce winner and break early out of the game
                 if(hiddenWord.toString().equals(secretString)){
-                    System.out.println("\nYou guessed right! Secret Word is " + secretString);
-                    j = 0;
-                    hiddenWord.setLength(0);
+                    System.out.println("\nYou guessed right! Word is \"" + secretString + "\"");
                     break;
                 }
 
-                j++;
-                //reset the index list back to empty
-                charPos.clear();
+                //end the game if the player has exhausted all attempts at guessing the right word
+                if(guessAttempts == 5){
+                    System.out.print("\n\nGame Over!! You lost! The secret word is: \"" + secretString + "\"");
+                    break;
+                }
 
             }
 
-            //ask user if they want to play another
-            System.out.print("\n\nDo You Want To Play Another Game? (y/n): ");
+            //prompt the user if they want to play the game again
+            System.out.print("\n\nDo you want to play another game? (y/n): ");
+            gamePlayResponse = input.next().charAt(0);
+
         }
 
-        //if no
-        System.out.println("\nThank you for playing!");
+        if(gamePlayResponse == 'n'){
+            System.out.print("\n\nThank You For Playing! Game exiting...");
+            System.exit(0);
+        }
 
-
-
+        input.close();
 
     }
 }
